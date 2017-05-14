@@ -56,7 +56,7 @@ class Demo extends Component {
         ref={slider => this.slider = slider}
         itemRenderer={this.renderItem}
         itemSize={151}
-        length={10000}
+        length={400}
         containerStyle={styles.container}
       />
 

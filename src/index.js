@@ -1,22 +1,42 @@
 import React, { PureComponent } from 'react'
 import { findDOMNode } from 'react-dom'
 
-const getSizes = (itemSize, itemPerPage, from, length) => {
-  const end = Math.min(from + itemPerPage * 2, length - 1)
-  let visibleStartIndex = Math.max(0, from)
-  if (end - from < itemPerPage) {
-    visibleStartIndex = end - from
+const getSizes = (itemSize, itemPerPage, from, length, viewportWidth) => {
+  const end = Math.min(from + itemPerPage * 2 + 1, length)
+  const start = Math.max(from - itemPerPage, 0)
+  let offsetLeft = (from - start) * itemSize
+  const visibleEndIndex = from + itemPerPage
+  if (visibleEndIndex === length) {
+    offsetLeft = offsetLeft - (viewportWidth - offsetLeft)
   }
-
-  const bufferLeft = Math.max(visibleStartIndex - itemPerPage, 0)
-  const offsetLeft = (visibleStartIndex - bufferLeft) * itemSize
 
   return {
-    visibleStartIndex,
+    visibleStartIndex: from,
+    visibleEndIndex: visibleEndIndex,
     end,
-    bufferLeft,
+    start,
     offsetLeft
   }
+}
+
+const getAnimatingOffset = (itemSize, itemPerPage, from, length, viewportWidth, nextPosition) => {
+  const { start, end, visibleEndIndex } = getSizes(itemSize, itemPerPage, from, length, viewportWidth)
+
+  if (length - nextPosition <= itemPerPage) {
+    const totalSize = (end - start) * itemSize
+    return totalSize - viewportWidth
+  }
+
+  let offsetIndex = 0
+  for (let i = start; i < end; i++) {
+    if (nextPosition === i) {
+      break
+    }
+
+    offsetIndex++
+  }
+
+  return offsetIndex * itemSize
 }
 
 class VirtualList extends PureComponent {
@@ -25,7 +45,8 @@ class VirtualList extends PureComponent {
     this.state = {
       itemPerPage: 0,
       from: 0,
-      cursor: 0
+      cursor: 0,
+      viewportWidth: 0
     }
   }
 
@@ -56,18 +77,19 @@ class VirtualList extends PureComponent {
   calculateItemPerPage = (props, container) => {
     const { itemSize } = props
 
-    const itemPerPage = Math.round(container.offsetWidth / itemSize)
+    const itemPerPage = Math.floor(container.offsetWidth / itemSize)
 
     this.setState({
-      itemPerPage
+      itemPerPage,
+      viewportWidth: container.offsetWidth
     })
   }
 
   goBack = () => {
     const { length, itemSize } = this.props
-    const { itemPerPage, from } = this.state
+    const { itemPerPage, from, viewportWidth } = this.state
     const prevValue = Math.max(from - itemPerPage, 0)
-    const nextStyle = getSizes(itemSize, itemPerPage, prevValue, length)
+    const nextStyle = getSizes(itemSize, itemPerPage, prevValue, length, viewportWidth)
 
     this.list.style.transform = `translateX(0px)`
     this.list.style.transition = 'transform 0.5s ease'
@@ -83,13 +105,13 @@ class VirtualList extends PureComponent {
 
   goNext = () => {
     const { length, itemSize } = this.props
-    const { itemPerPage, from } = this.state
-    const nextStart = from + itemPerPage
+    const { itemPerPage, from, viewportWidth } = this.state
+    const nextStart = Math.min(from + itemPerPage, length - itemPerPage)
 
-    const { offsetLeft } = getSizes(itemSize, itemPerPage, from, length)
-    const nextStyle = getSizes(itemSize, itemPerPage, nextStart, length)
+    const animatingOffset = getAnimatingOffset(itemSize, itemPerPage, from, length, viewportWidth, nextStart)
+    const nextStyle = getSizes(itemSize, itemPerPage, nextStart, length, viewportWidth)
 
-    this.list.style.transform = `translateX(-${offsetLeft + nextStyle.offsetLeft}px)`
+    this.list.style.transform = `translateX(-${animatingOffset}px)`
     this.list.style.transition = 'transform 0.5s ease'
     const doSetState = () => {
       this.list.removeEventListener('transitionend', doSetState)
@@ -102,13 +124,14 @@ class VirtualList extends PureComponent {
 
   render() {
     const { length, itemSize, itemRenderer, containerStyle } = this.props
-    const { itemPerPage, from } = this.state
+    const { itemPerPage, from, viewportWidth } = this.state
 
-    const { end, offsetLeft, bufferLeft, visibleStartIndex } = getSizes(
+    const { end, offsetLeft, start, visibleStartIndex } = getSizes(
       itemSize,
       itemPerPage,
       from,
-      length
+      length,
+      viewportWidth
     )
 
     const style = {
@@ -116,17 +139,9 @@ class VirtualList extends PureComponent {
       transform: `translateX(-${offsetLeft}px)`
     }
 
-    const visibleBound = Math.min(length - 1, visibleStartIndex + itemPerPage)
+    const visibleBound = Math.min(length, visibleStartIndex + itemPerPage)
     let items = []
-    for (let i = bufferLeft; i < end; i++) {
-      if (i < visibleStartIndex) {
-        console.log('buffer left', i)
-      } else if (i < visibleBound) {
-        console.log('visible', i)
-      } else {
-        console.log('buffer right', i)
-      }
-
+    for (let i = start; i < end; i++) {
       items.push(itemRenderer(i, i))
     }
 
