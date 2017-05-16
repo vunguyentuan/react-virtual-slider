@@ -1,6 +1,6 @@
 {
   "name": "react-virtual-slider",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "react-virtual-slider React component",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -29,11 +29,17 @@
     "react": "^15.5.4",
     "react-dom": "^15.5.4"
   },
-  "author": "",
-  "homepage": "",
+  "author": "vunguyentuan",
+  "homepage": "https://vunguyentuan.github.io/react-virtual-slider",
   "license": "MIT",
-  "repository": "",
+  "repository": "https://github.com/vunguyentuan/react-virtual-slider",
   "keywords": [
-    "react-component"
+    "react-component",
+    "slider",
+    "react",
+    "virtual",
+    "carousel",
+    "performance",
+    "large dataset"
   ]
 }
