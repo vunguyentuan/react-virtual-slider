@@ -1,5 +1,7 @@
 # react-virtual-slider
 
+[![Join the chat at https://gitter.im/react-virtual-slider/Lobby](https://badges.gitter.im/react-virtual-slider/Lobby.svg)](https://gitter.im/react-virtual-slider/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Travis][build-badge]][build]
 [![npm package][npm-badge]][npm]
 [![Coveralls][coveralls-badge]][coveralls]
