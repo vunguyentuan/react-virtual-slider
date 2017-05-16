@@ -104,7 +104,7 @@ In root folder:
 
 Dependencies
 ------------
-React Virtual List has no dependencies. It has the only one peerDependencies: `react`
+React Virtual Slider has no dependencies. It has the only one peerDependencies: `react`
 
 Reporting Issues
 ----------------
