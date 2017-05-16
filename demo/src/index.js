@@ -49,20 +49,26 @@ class Demo extends Component {
     this.slider.scrollTo(0)
   }
 
+  goto = (position) => {
+    this.slider.scrollTo(position)
+  }
+
   render() {
     return <div>
       <h1>react-virtual-slider Demo</h1>
+      <h1>TOTAL: 50,000 items</h1>
       <VirtualSlider
         ref={slider => this.slider = slider}
         itemRenderer={this.renderItem}
         itemSize={151}
-        length={400}
+        length={50000}
         containerStyle={styles.container}
       />
 
       <button onClick={this.handlePrev}>Prev</button>
       <button onClick={this.handleNext}>Next</button>
       <button onClick={this.goToFirst}>FIRST</button>
+      <button onClick={this.goto.bind(null, 500)}>500th item</button>
     </div>
   }
 }
