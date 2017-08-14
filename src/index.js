@@ -14,10 +14,24 @@ class VirtualList extends PureComponent {
   }
 
   scrollTo = index => {
+    const { startAction, endAction, length}  = this.props
+    const { itemPerPage } = this.state
+
+    if (index === 0) {
+      startAction && startAction()
+    }
+
+    if (index === length - itemPerPage) {
+      endAction && endAction()
+    }
+
     if (index === this.state.from) return
+
     this.setState({
       from: index
     })
+    this.list.removeEventListener('transitionend', this.lastTransitionendAction)
+    this.lastTransitionendAction = null
   }
 
   componentDidMount() {
@@ -57,13 +71,16 @@ class VirtualList extends PureComponent {
     this.list.style.transform = `translateX(0px)`
     this.list.style.transition = 'transform 0.5s ease'
     const doSetState = () => {
-      this.list.removeEventListener('transitionend', doSetState)
       this.list.style.transition = 'none'
       this.list.style.transform = `translateX(-${nextStyle.offsetLeft}px)`
       this.scrollTo(prevValue)
     }
 
+    if (this.lastTransitionendAction) {
+      this.list.removeEventListener("transitionend", this.lastTransitionendAction)
+    }
     this.list.addEventListener('transitionend', doSetState)
+    this.lastTransitionendAction = doSetState
   }
 
   goNext = () => {
@@ -77,12 +94,16 @@ class VirtualList extends PureComponent {
     this.list.style.transform = `translateX(-${animatingOffset}px)`
     this.list.style.transition = 'transform 0.5s ease'
     const doSetState = () => {
-      this.list.removeEventListener('transitionend', doSetState)
       this.list.style.transition = 'none'
       this.list.style.transform = `translateX(-${nextStyle.offsetLeft}px)`
       this.scrollTo(nextStart)
     }
+
+    if (this.lastTransitionendAction) {
+      this.list.removeEventListener("transitionend", this.lastTransitionendAction)
+    }
     this.list.addEventListener('transitionend', doSetState)
+    this.lastTransitionendAction = doSetState
   }
 
   render() {

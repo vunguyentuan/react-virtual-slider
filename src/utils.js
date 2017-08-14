@@ -3,7 +3,7 @@ export const getSizes = (itemSize, itemPerPage, from, length, viewportWidth) => 
   const start = Math.max(from - itemPerPage, 0)
   let offsetLeft = (from - start) * itemSize
   const visibleEndIndex = from + itemPerPage
-  if (visibleEndIndex === length) {
+  if (visibleEndIndex >= length) {
     const totalSize = (end - start) * itemSize
     offsetLeft = totalSize - viewportWidth
   }
